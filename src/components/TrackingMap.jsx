@@ -46,19 +46,19 @@ const MapUpdater = ({ providerPos, customerPos }) => {
     if (providerPos && customerPos) {
       const bounds = L.latLngBounds([providerPos, customerPos]);
       map.fitBounds(bounds, { 
-        padding: [80, 80],
-        maxZoom: 15,
+        padding: [100, 100],
+        maxZoom: 12,
         animate: true,
         duration: 1
       });
     } else if (customerPos) {
-      map.setView(customerPos, 14);
+      map.setView(customerPos, 11);
     }
   }, [providerPos, customerPos, map]);
   return null;
 };
 
-export const TrackingMap = ({ providerPos, customerPos, route }) => {
+export const TrackingMap = ({ providerPos, customerPos, route, roadRoute }) => {
   const center = customerPos || [40.7128, -74.0060];
   
   console.log('🗺️ MAP: Rendering - Provider:', providerPos, 'Customer:', customerPos, 'Route points:', route.length);
@@ -67,7 +67,7 @@ export const TrackingMap = ({ providerPos, customerPos, route }) => {
     <MapContainer 
       key="map" 
       center={center} 
-      zoom={14} 
+      zoom={11} 
       className="h-full w-full" 
       scrollWheelZoom={true}
       dragging={true}
@@ -83,26 +83,17 @@ export const TrackingMap = ({ providerPos, customerPos, route }) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
       
-      {/* Direct line between provider and customer */}
-      {providerPos && customerPos && (
+      {/* Road route between provider and customer */}
+      {roadRoute && roadRoute.length > 0 && (
         <Polyline 
-          positions={[providerPos, customerPos]} 
-          color="#7c3aed" 
+          positions={roadRoute} 
+          color="#2563eb" 
           weight={4} 
-          opacity={0.6}
-          dashArray="8, 8"
+          opacity={0.8}
         />
       )}
       
-      {/* Route path (traveled) */}
-      {route.length > 1 && (
-        <Polyline 
-          positions={route} 
-          color="#7c3aed" 
-          weight={5} 
-          opacity={0.9}
-        />
-      )}
+
       
       {/* Customer marker (destination) */}
       {customerPos && (

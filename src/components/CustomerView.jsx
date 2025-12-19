@@ -7,6 +7,7 @@ export const CustomerView = ({ tripId }) => {
   const socket = useSocket();
   const [providerLocation, setProviderLocation] = useState(null);
   const [route, setRoute] = useState([]);
+  const [roadRoute, setRoadRoute] = useState([]);
   const [tripData, setTripData] = useState(null);
   const [distance, setDistance] = useState(0);
   const [eta, setEta] = useState(0);
@@ -15,27 +16,32 @@ export const CustomerView = ({ tripId }) => {
   const [rideTime, setRideTime] = useState(0);
 
   useEffect(() => {
-    console.log('📍 CUSTOMER: Requesting live location...');
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log('✅ CUSTOMER: Got live location - Lat:', latitude, 'Lng:', longitude);
-          setCustomerLocation([latitude, longitude]);
-        },
-        (error) => {
-          console.error('❌ CUSTOMER: Location error:', error.message);
-          setLocationError(error.message);
-          alert('Please allow location access to use the tracker');
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    } else {
-      console.error('❌ CUSTOMER: Geolocation not supported');
-      setLocationError('Geolocation not supported');
-      alert('Your browser does not support geolocation');
-    }
+    // Set fixed customer location
+    setCustomerLocation([11.838993, 75.568532]);
+    console.log('✅ CUSTOMER: Fixed location set - Lat: 11.838993, Lng: 75.568532');
   }, []);
+
+  const getRoadRoute = async (startLat, startLng, endLat, endLng) => {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`
+      );
+      const data = await response.json();
+      if (data.routes && data.routes[0]) {
+        const coordinates = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+        setRoadRoute(coordinates);
+      }
+    } catch (error) {
+      console.error('Road route error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (customerLocation && socket) {
+      // Send fixed customer location to provider
+      socket.emit('customer:location', { tripId, lat: customerLocation[0], lng: customerLocation[1] });
+    }
+  }, [customerLocation, socket, tripId]);
 
   useEffect(() => {
     if (!socket) {
@@ -52,7 +58,7 @@ export const CustomerView = ({ tripId }) => {
     });
 
     socket.on('location:update', (data) => {
-      console.log('📍 CUSTOMER: Location update received - Lat:', data.lat, 'Lng:', data.lng);
+      console.log('📍 CUSTOMER: Provider location update - Lat:', data.lat, 'Lng:', data.lng);
       const newPos = [data.lat, data.lng];
       setProviderLocation(newPos);
       setRoute(prev => [...prev, newPos]);
@@ -61,7 +67,22 @@ export const CustomerView = ({ tripId }) => {
         const dist = calculateDistance(data.lat, data.lng, customerLocation[0], customerLocation[1]);
         setDistance(dist);
         setEta(calculateETA(dist));
-        console.log('📏 Distance:', dist.toFixed(2), 'km | ETA:', eta, 'min');
+        console.log('📏 Distance:', dist.toFixed(2), 'km | ETA:', calculateETA(dist), 'min');
+      }
+    });
+
+    socket.on('provider:location', (data) => {
+      console.log('🚚 CUSTOMER: Provider moving - Lat:', data.lat, 'Lng:', data.lng);
+      console.log('📍 CUSTOMER: Received Provider Location:', { lat: data.lat, lng: data.lng });
+      const newPos = [data.lat, data.lng];
+      setProviderLocation(newPos);
+      setRoute(prev => [...prev, newPos]);
+      
+      if (customerLocation) {
+        getRoadRoute(data.lat, data.lng, customerLocation[0], customerLocation[1]);
+        const dist = calculateDistance(data.lat, data.lng, customerLocation[0], customerLocation[1]);
+        setDistance(dist);
+        setEta(calculateETA(dist));
       }
     });
 
@@ -74,6 +95,7 @@ export const CustomerView = ({ tripId }) => {
       console.log('🧹 CUSTOMER: Cleaning up socket listeners');
       socket.off('trip:data');
       socket.off('location:update');
+      socket.off('provider:location');
       socket.off('trip:ended');
     };
   }, [socket, tripId, customerLocation]);
@@ -127,7 +149,8 @@ export const CustomerView = ({ tripId }) => {
         <TrackingMap 
           providerPos={providerLocation} 
           customerPos={customerLocation} 
-          route={route} 
+          route={route}
+          roadRoute={roadRoute}
         />
       </div>
 

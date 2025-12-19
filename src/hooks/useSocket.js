@@ -8,7 +8,10 @@ export const useSocket = (url = 'http://localhost:3000') => {
     console.log('🔌 Connecting to socket server:', url);
     const socketInstance = io(url, {
       transports: ['websocket', 'polling'],
-      timeout: 5000
+      timeout: 5000,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
     });
     
     socketInstance.on('connect', () => {
@@ -21,7 +24,6 @@ export const useSocket = (url = 'http://localhost:3000') => {
     
     socketInstance.on('connect_error', (error) => {
       console.error('❌ Socket connection error:', error.message);
-      console.error('💡 Make sure backend server is running on', url);
     });
     
     setSocket(socketInstance);

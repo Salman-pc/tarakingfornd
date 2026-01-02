@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { TrackingMap } from './TrackingMap';
 import { useSocket } from '../hooks/useSocket';
 import { calculateDistance, calculateETA } from '../utils/tracking';
+import SendLocationButton from './SendLocationbutton';
 
-export const CustomerView = ({ tripId }) => {
+const CustomerView = ({ tripId }) => {
   const socket = useSocket();
   const [providerLocation, setProviderLocation] = useState(null);
   const [route, setRoute] = useState([]);
@@ -77,7 +78,7 @@ export const CustomerView = ({ tripId }) => {
       const newPos = [data.lat, data.lng];
       setProviderLocation(newPos);
       setRoute(prev => [...prev, newPos]);
-      
+
       if (customerLocation) {
         getRoadRoute(data.lat, data.lng, customerLocation[0], customerLocation[1]);
         const dist = calculateDistance(data.lat, data.lng, customerLocation[0], customerLocation[1]);
@@ -146,9 +147,9 @@ export const CustomerView = ({ tripId }) => {
 
       {/* Map */}
       <div className="flex-1 relative" style={{ touchAction: 'pan-y' }}>
-        <TrackingMap 
-          providerPos={providerLocation} 
-          customerPos={customerLocation} 
+        <TrackingMap
+          providerPos={providerLocation}
+          customerPos={customerLocation}
           route={route}
           roadRoute={roadRoute}
         />
@@ -181,7 +182,7 @@ export const CustomerView = ({ tripId }) => {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2 text-xs">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -209,11 +210,17 @@ export const CustomerView = ({ tripId }) => {
           </div>
 
           {/* Cancel Button */}
-          <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors">
-            Cancel Service
-          </button>
+          <div className='space-y-2'>
+            <SendLocationButton />
+            
+            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors">
+              Cancel Service
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default CustomerView

@@ -36,6 +36,7 @@ const CustomerView = ({ tripId }) => {
       console.error('Road route error:', error);
     }
   };
+  
 
   useEffect(() => {
     if (customerLocation && socket) {

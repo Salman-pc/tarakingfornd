@@ -27,3 +27,12 @@ export const addressAddApi = async (userData)=>{
         throw error;
     }
 }
+
+export const getMyAdressApi = async ()=>{
+    try {
+        const response = await axiosConfig.get("/api/user/address/list")
+        return response.data
+    } catch (error) {
+        throw error;
+    }
+}

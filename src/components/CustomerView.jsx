@@ -3,6 +3,7 @@ import { TrackingMap } from './TrackingMap';
 import { useSocket } from '../hooks/useSocket';
 import { calculateDistance, calculateETA } from '../utils/tracking';
 import SendLocationButton from './SendLocationbutton';
+import { getMyAdressApi } from '../api/api';
 
 const CustomerView = ({ tripId }) => {
   const socket = useSocket();
@@ -22,6 +23,8 @@ const CustomerView = ({ tripId }) => {
     console.log('✅ CUSTOMER: Fixed location set - Lat: 11.838993, Lng: 75.568532');
   }, []);
 
+
+
   const getRoadRoute = async (startLat, startLng, endLat, endLng) => {
     try {
       const response = await fetch(
@@ -36,7 +39,7 @@ const CustomerView = ({ tripId }) => {
       console.error('Road route error:', error);
     }
   };
-  
+
 
   useEffect(() => {
     if (customerLocation && socket) {
@@ -66,7 +69,7 @@ const CustomerView = ({ tripId }) => {
       setRoute(prev => [...prev, newPos]);
 
       if (customerLocation) {
-        const dist = calculateDistance(data.lat, data.lng, customerLocation[0], customerLocation[1]);
+        const dist = calculateDistance(data.lat, data.lng, customerLocation.lat, customerLocation.lng);
         setDistance(dist);
         setEta(calculateETA(dist));
         console.log('📏 Distance:', dist.toFixed(2), 'km | ETA:', calculateETA(dist), 'min');
@@ -74,6 +77,7 @@ const CustomerView = ({ tripId }) => {
     });
 
     socket.on('provider:location', (data) => {
+
       console.log('🚚 CUSTOMER: Provider moving - Lat:', data.lat, 'Lng:', data.lng);
       console.log('📍 CUSTOMER: Received Provider Location:', { lat: data.lat, lng: data.lng });
       const newPos = [data.lat, data.lng];
@@ -81,8 +85,8 @@ const CustomerView = ({ tripId }) => {
       setRoute(prev => [...prev, newPos]);
 
       if (customerLocation) {
-        getRoadRoute(data.lat, data.lng, customerLocation[0], customerLocation[1]);
-        const dist = calculateDistance(data.lat, data.lng, customerLocation[0], customerLocation[1]);
+        getRoadRoute(data.lat, data.lng, customerLocation.lat, customerLocation.lng);
+        const dist = calculateDistance(data.lat, data.lng, customerLocation.lat, customerLocation.lng);
         setDistance(dist);
         setEta(calculateETA(dist));
       }
@@ -128,6 +132,19 @@ const CustomerView = ({ tripId }) => {
         </div>
       </div>
     );
+  }
+
+  const getMyaddress = async () => {
+    try {
+      const result = await getMyAdressApi()
+      console.log(result, "result");
+
+      setCustomerLocation({ lat: result?.UserLocation?.location[0], lng: result?.UserLocation?.location[1] });
+
+    } catch (error) {
+      console.log(error);
+
+    }
   }
 
   console.log('👤 CUSTOMER VIEW: Provider location:', providerLocation, 'Route length:', route.length);
@@ -213,7 +230,12 @@ const CustomerView = ({ tripId }) => {
           {/* Cancel Button */}
           <div className='space-y-2'>
             <SendLocationButton />
-            
+            <button
+              onClick={getMyaddress}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors">
+              Track Now
+            </button>
+
             <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl transition-colors">
               Cancel Service
             </button>

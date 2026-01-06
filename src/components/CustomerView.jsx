@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const CustomerView = ({ tripId }) => {
   const socket = useSocket();
-  const navigate =useNavigate()
+  const navigate = useNavigate()
   const [providerLocation, setProviderLocation] = useState(null);
   const [route, setRoute] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
@@ -150,6 +150,11 @@ const CustomerView = ({ tripId }) => {
     }
   }
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
+
   console.log('👤 CUSTOMER VIEW: Provider location:', providerLocation, 'Route length:', route.length);
 
   return (
@@ -165,12 +170,9 @@ const CustomerView = ({ tripId }) => {
           <h1 className="text-lg font-semibold flex-1 text-center mr-9">Track Live Location</h1>
         </div>
         <div>
-          <button 
-          onClick={()=>handilelogout(
-            localStorage.clear(),
-            navigate('/login')
-          )}
-          className='border-2 rounded-sm mx-4 px-3 py-3'>
+          <button
+            onClick={handleLogout}
+            className='border-2 rounded-sm mx-4 px-3 py-3'>
             Logout
           </button>
         </div>

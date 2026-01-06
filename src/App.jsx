@@ -1,10 +1,10 @@
-import {  Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import AuthForm from './components/auth';
 import CustomerView from './components/CustomerView.jsx'
 import { useEffect } from 'react';
 
 function App() {
-  
+
   const tripId = 'TRIP-001';
   const navigate = useNavigate()
   const accessToken = localStorage.getItem("accessToken");
@@ -12,7 +12,7 @@ function App() {
   useEffect(() => {
     if (accessToken) {
       navigate("/");
-    } 
+    }
 
   }, [accessToken]);
 
@@ -21,11 +21,13 @@ function App() {
       <Routes>
         {/* <Route path="/" element={<AuthForm mode="login" />} /> */}
         <Route path="/signup" element={<AuthForm mode="signup" />} />
+        <Route path="/login" element={<AuthForm mode="login" />} />
+
         <Route
           path="/"
-          element={accessToken ? <CustomerView tripId={tripId}  /> : <AuthForm mode="login" />}
+          element={accessToken ? <CustomerView tripId={tripId} /> : <AuthForm mode="login" />}
         />
-         <Route path="*" element={<NOtfoundpage />} />
+        <Route path="*" element={<NOtfoundpage />} />
 
       </Routes>
     </div>

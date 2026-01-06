@@ -4,9 +4,12 @@ import { useSocket } from '../hooks/useSocket';
 import { calculateDistance, calculateETA } from '../utils/tracking';
 import SendLocationButton from './SendLocationbutton';
 import { getMyAdressApi } from '../api/api';
+import { useNavigate } from "react-router-dom";
+
 
 const CustomerView = ({ tripId }) => {
   const socket = useSocket();
+  const navigate =useNavigate()
   const [providerLocation, setProviderLocation] = useState(null);
   const [route, setRoute] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
@@ -152,7 +155,7 @@ const CustomerView = ({ tripId }) => {
   return (
     <div className="relative h-screen w-full overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white shadow-sm">
+      <div className="flex justify-between items-center bg-white shadow-sm">
         <div className="flex items-center px-4 py-3">
           <button className="mr-3" onClick={() => window.history.back()}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,6 +163,16 @@ const CustomerView = ({ tripId }) => {
             </svg>
           </button>
           <h1 className="text-lg font-semibold flex-1 text-center mr-9">Track Live Location</h1>
+        </div>
+        <div>
+          <button 
+          onClick={()=>handilelogout(
+            localStorage.clear(),
+            navigate('/login')
+          )}
+          className='border-2 rounded-sm mx-4 px-3 py-3'>
+            Logout
+          </button>
         </div>
       </div>
 

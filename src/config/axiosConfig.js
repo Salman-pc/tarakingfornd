@@ -1,7 +1,7 @@
 
 import axios from "axios";
-// export const baseURL =  "https://tarakingbackend-1.onrender.com" ;
-export const baseURL =  "http://localhost:9000";
+export const baseURL =  "https://tarakingbackend-1.onrender.com" ;
+// export const baseURL =  "http://localhost:9000";
 
 
 const axiosConfig = axios.create({

@@ -21,7 +21,7 @@ export const loginUserApi = async (userData)=>{
 
 export const addressAddApi = async (userData)=>{
     try {
-        const response = await axiosConfig.post("/api/user/address/add",userData)
+        const response = await axiosConfig.post("/api/user/address/add",{"location":userData})
         return response.data
     } catch (error) {
         throw error;
